@@ -1,6 +1,7 @@
 # Only mysql — and probably mariadb — are supported.
 # Create a database with utf8 encoding and ut8_unicode_ci collation for development or production.
-
+# TODO: If the developer has already created this database manually, the encoding may be incorrect.
+# Set it post-facto.
 default: &default
   adapter: mysql2
   encoding: utf8
