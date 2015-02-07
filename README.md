@@ -46,7 +46,7 @@ Initialize
 --------------
 1. **Start Guard**
 
-      $ `guard`
+      $ `bundle exec guard`
 
 2. **Migrate the database**
 
