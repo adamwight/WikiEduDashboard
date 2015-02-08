@@ -26,7 +26,6 @@ equal-height(vcenter=false)
     *
       -ms-flex 0 1 auto
 
-
 /* Responsive Mixins
 // see: http://jakearchibald.github.com/sass-ie
 --------------------------------------------- */
@@ -145,3 +144,12 @@ show-over(breakpoint, display)
 
 .unselectable
   user-select none
+
+/* Adapted from http://davidwalsh.name/stylus-parent-selectors */
+/* mixin definition ; sets LTR and RTL within the same style call*/
+bidi-style(prop, value, inverse-prop, default-value)
+  {prop} value
+
+  html[dir=rtl] &
+    {inverse-prop} value
+    {prop} default-value

@@ -1,4 +1,4 @@
-gem 'browser'
+  gem 'browser'
 
 # The application controller is the parent for all other controllers.
 # It includes methods are relevant across the application, such as permissions
@@ -94,6 +94,16 @@ class ApplicationController < ActionController::Base
 
   def ssl_configured?
     Rails.env.staging? || Rails.env.production?
+  end
+
+  helper_method :rtl?
+  def rtl?
+    # FIXME: Does this work for longer locales, such as he-IL?
+    I18n.locale.in? [:he, :ar, :yi, :ur, :fa, :ps, :sd, :ug, :ku, :dv]
+  end
+
+  def set_locale
+    I18n.locale = params[:locale] || I18n.default_locale
   end
 
   def set_locale_override
