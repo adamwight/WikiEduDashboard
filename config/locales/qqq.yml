@@ -3,12 +3,19 @@ qqq:
   article:
     character_doc: Documentation for an article's character total add and remove count.
     edited: Label for a list of articles edited.
-    edited_none: Label stating that no articles have been edited.
+    edited_none: |
+      Label stating that no articles have been edited.
+      Parameters:
+      * title: The entity that has not edited anything yet.
     title: Label for an article title.
     view: Command to view an article.
     view_all: Command to view all articles.
     view_doc: Documentation for the view count.
-    views_added: Maintenance script message stating how many view counts have been added to an article.
+    views_added: |
+      Maintenance script message stating how many view counts have been added to an article.
+      Parameters:
+      * count: Number of article views being added.
+      * title: Article title.
 
   cohort:
     view_other: Command to view another cohort.
@@ -19,7 +26,10 @@ qqq:
     duration: Label for the course's duration.
     instructor: Label for the course's instructor.
     students: Label for the list of students in a course.
-    students_none: Label indicating the course has no students.
+    students_none: |
+      Label indicating the course has no students.
+      Parameters:
+      * title: Course title.
     title: Label for a course title.
     view: Command to view a course.
     view_wiki: Command to view a course on the wiki.
@@ -29,7 +39,10 @@ qqq:
 
   metrics:
     activity: Label for activity feed.
-    activity_none: Label for no activity.
+    activity_none: |
+      Label for no activity.
+      Parameters:
+      * Entity with no activity.
     char: Label for number of characters added and removed.
     char_added: Laber for number of characters added.
     date_time: Label for a revision or activity timestamp.
