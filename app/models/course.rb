@@ -32,6 +32,8 @@ class Course < ActiveRecord::Base
   has_many :blocks, through: :weeks
   has_many :gradeables, as: :gradeable_item
 
+  belongs_to :wiki_projects
+
   scope :current, lambda {
     current_and_future.where('start < ?', Time.now)
   }

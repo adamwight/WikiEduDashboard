@@ -10,6 +10,8 @@ class Article < ActiveRecord::Base
   has_many :courses, -> { uniq }, through: :articles_courses
   has_many :assignments
 
+  belongs_to :wiki_projects
+
   scope :live, -> { where(deleted: false) }
   scope :current, -> { joins(:courses).merge(Course.current).uniq }
   scope :namespace, -> ns { where(namespace: ns) }

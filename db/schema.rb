@@ -11,20 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150708222255) do
+ActiveRecord::Schema.define(version: 20150718183203) do
 
   create_table "articles", force: true do |t|
     t.string   "title"
-    t.integer  "views",             limit: 8, default: 0
+    t.integer  "views",             limit: 8,  default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "character_sum",               default: 0
-    t.integer  "revision_count",              default: 0
+    t.integer  "character_sum",                default: 0
+    t.integer  "revision_count",               default: 0
     t.date     "views_updated_at"
     t.integer  "namespace"
     t.string   "rating"
     t.datetime "rating_updated_at"
-    t.boolean  "deleted",                     default: false
+    t.boolean  "deleted",                      default: false
+    t.integer  "wiki_project_id"
+    t.string   "language",          limit: 16
   end
 
   create_table "articles_courses", force: true do |t|
@@ -96,24 +98,26 @@ ActiveRecord::Schema.define(version: 20150708222255) do
     t.date     "end"
     t.string   "school"
     t.string   "term"
-    t.integer  "character_sum",               default: 0
-    t.integer  "view_sum",          limit: 8, default: 0
-    t.integer  "user_count",                  default: 0
-    t.integer  "article_count",               default: 0
-    t.integer  "revision_count",              default: 0
+    t.integer  "character_sum",                default: 0
+    t.integer  "view_sum",          limit: 8,  default: 0
+    t.integer  "user_count",                   default: 0
+    t.integer  "article_count",                default: 0
+    t.integer  "revision_count",               default: 0
     t.string   "slug"
-    t.boolean  "listed",                      default: true
-    t.integer  "untrained_count",             default: 0
+    t.boolean  "listed",                       default: true
+    t.integer  "untrained_count",              default: 0
     t.string   "meeting_days"
     t.string   "signup_token"
     t.string   "assignment_source"
     t.string   "subject"
     t.integer  "expected_students"
     t.text     "description"
-    t.integer  "submitted",                   default: 0
+    t.integer  "submitted",                    default: 0
     t.string   "passcode"
     t.date     "timeline_start"
     t.date     "timeline_end"
+    t.integer  "wiki_project_id"
+    t.string   "language",          limit: 16
   end
 
   add_index "courses", ["slug"], name: "index_courses_on_slug", using: :btree
@@ -166,18 +170,20 @@ ActiveRecord::Schema.define(version: 20150708222255) do
     t.string   "wiki_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "character_sum",                 default: 0
-    t.integer  "view_sum",            limit: 8, default: 0
-    t.integer  "course_count",                  default: 0
-    t.integer  "article_count",                 default: 0
-    t.integer  "revision_count",                default: 0
-    t.boolean  "trained",                       default: false
+    t.integer  "character_sum",                  default: 0
+    t.integer  "view_sum",            limit: 8,  default: 0
+    t.integer  "course_count",                   default: 0
+    t.integer  "article_count",                  default: 0
+    t.integer  "revision_count",                 default: 0
+    t.boolean  "trained",                        default: false
     t.integer  "global_id"
     t.datetime "remember_created_at"
     t.string   "remember_token"
     t.string   "wiki_token"
     t.string   "wiki_secret"
-    t.integer  "permissions",                   default: 0
+    t.integer  "permissions",                    default: 0
+    t.integer  "wiki_project_id"
+    t.string   "language",            limit: 16
   end
 
   create_table "weeks", force: true do |t|
@@ -185,6 +191,14 @@ ActiveRecord::Schema.define(version: 20150708222255) do
     t.integer  "course_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "wiki_projects", force: true do |t|
+    t.string  "short_name",              limit: 64
+    t.string  "domain",                  limit: 64
+    t.string  "article_path"
+    t.string  "script_path"
+    t.boolean "has_language_subdomains"
   end
 
 end

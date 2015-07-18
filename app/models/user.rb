@@ -13,6 +13,8 @@ class User < ActiveRecord::Base
   has_many :assignments
   has_many :uploads, class_name: CommonsUpload
 
+  belongs_to :wiki_projects
+
   scope :admin, -> { where(permissions: 1) }
   scope :current, -> { joins(:courses).merge(Course.current).uniq }
   scope :role, lambda { |role|
