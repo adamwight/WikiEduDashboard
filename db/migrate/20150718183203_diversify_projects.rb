@@ -9,7 +9,6 @@ class DiversifyProjects < ActiveRecord::Migration
     # * Default existing data to enwiki.
 
     create_table :wiki_projects do |t|
-      t.column :short_name, :string, {limit: 64}
       t.column :domain, :string, {limit: 64}
       t.column :article_path, :string, {limit: 255}
       t.column :script_path, :string, {limit: 255}
