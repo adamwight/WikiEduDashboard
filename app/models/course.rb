@@ -43,6 +43,7 @@ class Course < ActiveRecord::Base
   has_many :courses_users, class_name: CoursesUsers, dependent: :destroy
   has_many :users, -> { uniq }, through: :courses_users,
                                 after_remove: :cleanup_articles
+  # FIXME: Would it be nicer to use role names?
   has_many :students, -> { where('courses_users.role = 0') },
            through: :courses_users, source: :user
   has_many :nonstudents, -> { where('courses_users.role > 0') },
@@ -63,6 +64,7 @@ class Course < ActiveRecord::Base
     where('uploaded_at >= ?', course.start).where('uploaded_at <= ?', course.end)
   end, through: :students)
 
+  # TODO: Aren't we disabling rather than destroying?
   has_many :articles_courses, class_name: ArticlesCourses, dependent: :destroy
   has_many :articles, -> { uniq }, through: :articles_courses
 
@@ -188,6 +190,7 @@ class Course < ActiveRecord::Base
 
   def word_count
     require "#{Rails.root}/lib/word_count"
+    # Yes, this is just dividing by 5.175 and rounding down.
     WordCount.from_characters(character_sum)
   end
 

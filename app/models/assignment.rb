@@ -35,6 +35,7 @@ class Assignment < ActiveRecord::Base
   def page_url
     language = ENV['wiki_language']
     escaped_title = article_title.tr(' ', '_')
+    # FIXME: Use method on @wiki instead
     "https://#{language}.wikipedia.org/wiki/#{escaped_title}"
   end
 

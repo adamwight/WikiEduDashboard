@@ -37,6 +37,8 @@ class Article < ActiveRecord::Base
 
   # Always save titles with underscores instead of spaces, since that's the way
   # they are in the MediaWiki database.
+  # TODO: Are there any other transforms we should be doing?  Are we normalizing
+  # to MW conventions here when we should instead at the brink of feeding to a MW API?
   validates :title, presence: true
   before_validation do
     self.title = title.tr(' ', '_')

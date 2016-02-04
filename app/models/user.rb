@@ -55,6 +55,7 @@ class User < ActiveRecord::Base
   scope :untrained, -> { where(trained: false) }
   scope :current, -> { joins(:courses).merge(Course.current).uniq }
   scope :role, lambda { |role|
+    # FIXME: Why do we have to reenumerate roles here?
     roles = { 'student' => CoursesUsers::Roles::STUDENT_ROLE,
               'instructor' => CoursesUsers::Roles::INSTRUCTOR_ROLE,
               'online_volunteer' => CoursesUsers::Roles::ONLINE_VOLUNTEER_ROLE,
