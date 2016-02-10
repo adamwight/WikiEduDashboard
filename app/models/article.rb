@@ -30,6 +30,7 @@ class Article < ActiveRecord::Base
   has_many :articles_courses, class_name: ArticlesCourses
   has_many :courses, -> { uniq }, through: :articles_courses
   has_many :assignments
+  belongs_to :wiki
 
   scope :live, -> { where(deleted: false) }
   scope :current, -> { joins(:courses).merge(Course.current).uniq }
@@ -41,6 +42,8 @@ class Article < ActiveRecord::Base
   before_validation do
     self.title = title.tr(' ', '_')
   end
+
+  before_save :set_default_wiki
 
   ####################
   # CONSTANTS        #
@@ -95,5 +98,10 @@ class Article < ActiveRecord::Base
   #################
   def self.update_all_caches(articles=nil)
     Utils.run_on_all(Article, :update_cache, articles)
+  end
+
+  def set_default_wiki
+    # FIXME: transitional only
+    wiki = Wiki.default_wiki if wiki.nil?
   end
 end

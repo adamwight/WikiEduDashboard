@@ -23,9 +23,12 @@
 class Revision < ActiveRecord::Base
   belongs_to :user
   belongs_to :article
+  belongs_to :wiki
   scope :after_date, -> (date) { where('date > ?', date) }
   scope :live, -> { where(deleted: false) }
   scope :user, -> { where(system: false) }
+
+  before_save :set_default_wiki
 
   ####################
   # Instance methods #
@@ -46,5 +49,9 @@ class Revision < ActiveRecord::Base
   def infer_courses_from_user
     return [] if user.blank?
     user.courses.where('start <= ?', date).where('end >= ?', date)
+  end
+
+  def set_default_wiki
+    wiki = Wiki.default_wiki if wiki.nil?
   end
 end
