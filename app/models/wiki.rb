@@ -44,8 +44,12 @@ class Wiki < ActiveRecord::Base
 
   # Is this useful?: has_many :article_wiki, :course_wiki, :user_wiki
 
+  def site
+    "#{language}.#{project}.org"
+  end
+
   def base_url
-    "https://#{language}.#{project}.org/"
+    "https://#{site}/"
   end
 
   def oauth_url
