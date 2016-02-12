@@ -88,24 +88,25 @@ class RevisionImporter
     AssignmentImporter.update_assignment_article_ids
   end
 
-  def self.get_revisions_from_import_data(data)
+  def self.get_revisions_from_import_data(data, wiki)
     rev_ids = data.map do |_a_id, a|
       a['revisions'].map { |r| r['id'] }
     end
     rev_ids = rev_ids.flatten
-    Revision.where(id: rev_ids)
+    Revision.where(native_id: rev_ids, wiki_id: wiki.id)
   end
 
   def self.import_revisions_slice(sub_data)
     articles, revisions = [], []
 
     sub_data.each do |_a_id, a|
-      article = Article.new(id: a['article']['id'])
+      article = Article.new(native_id: a['article']['id'])
       article.update(a['article'], false)
       articles.push article
 
       a['revisions'].each do |r|
-        revision = Revision.new(id: r['id'])
+        revision = Revision.new(native_id: r['id'])
+        # XXX rename ID columns
         revision.update(r, false)
         revisions.push revision
       end
@@ -117,7 +118,7 @@ class RevisionImporter
     Revision.import revisions
   end
 
-  def self.move_or_delete_revisions(revisions=nil)
+  def self.move_or_delete_revisions(revisions=nil, wiki)
     revisions ||= Revision.all
     return if revisions.empty?
 
@@ -126,23 +127,23 @@ class RevisionImporter
     end
     synced_ids = synced_revisions.map { |r| r['rev_id'].to_i }
 
-    deleted_ids = revisions.pluck(:id) - synced_ids
-    Revision.where(id: deleted_ids).update_all(deleted: true)
-    Revision.where(id: synced_ids).update_all(deleted: false)
+    deleted_ids = revisions.pluck(:native_id) - synced_ids
+    Revision.where(native_id: deleted_ids).update_all(deleted: true)
+    Revision.where(native_id: synced_ids).update_all(deleted: false)
 
     moved_ids = synced_ids - deleted_ids
     moved_revisions = synced_revisions.reduce([]) do |moved, rev|
       moved.push rev if moved_ids.include? rev['rev_id'].to_i
     end
     moved_revisions.each do |moved|
-      handle_moved_revision moved
+      handle_moved_revision moved, wiki
     end
   end
 
-  def self.handle_moved_revision(moved)
+  def self.handle_moved_revision(moved, wiki)
     article_id = moved['rev_page']
-    Revision.find(moved['rev_id']).update(article_id: article_id)
+    Revision.find(moved['rev_id']).update(article_id: Article.where(native_id: article_id, wiki_id: wiki.id).native_id)
     ArticleImporter
-      .import_articles([article_id]) unless Article.exists?(article_id)
+      .import_articles([article_id]) unless Article.where(native_id: article_id).any?
   end
 end
