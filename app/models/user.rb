@@ -87,6 +87,10 @@ class User < ActiveRecord::Base
     "#{home_wiki.base_url}wiki/Special:PrefixIndex/User:#{wiki_id}"
   end
 
+  def user_url
+    "#{home_wiki.base_url}wiki/User:#{wiki_id}"
+  end
+
   def talk_page
     "User_talk:#{wiki_id}"
   end

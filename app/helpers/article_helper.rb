@@ -1,5 +1,6 @@
 #= Helpers for article views
 module ArticleHelper
+  # TODO: move wiki URL building to a lib
   NS = {
     Article::Namespaces::MAINSPACE => '',
     Article::Namespaces::TALK => 'Talk:',
@@ -18,7 +19,7 @@ module ArticleHelper
     language = Figaro.env.wiki_language
     prefix = NS[article.namespace]
     escaped_title = article.title.tr(' ', '_')
-    "https://#{language}.wikipedia.org/wiki/#{prefix}#{escaped_title}"
+    "#{article.wiki.base_url}wiki/#{prefix}#{escaped_title}"
   end
 
   def full_title(article)

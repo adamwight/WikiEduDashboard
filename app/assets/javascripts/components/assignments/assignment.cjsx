@@ -1,8 +1,8 @@
 React        = require 'react'
 ArticleStore = require '../../stores/article_store'
 
-userLink = (wiki_id) ->
-  <a key={wiki_id} href="https://en.wikipedia.org/wiki/User:#{wiki_id}">{wiki_id}</a>
+userLink = (wiki_base_url, wiki_id) ->
+  <a key={wiki_id} href="#{wiki_base_url}wiki/User:#{wiki_id}">{wiki_id}</a>
 
 Assignment = React.createClass(
   displayName: 'Assignment'
@@ -28,10 +28,10 @@ Assignment = React.createClass(
     reviewers = []
     for assignment in _.sortBy @props.assign_group, 'user_wiki_id'
       if assignment.role == 0
-        assignees.push userLink(assignment.user_wiki_id)
+        assignees.push userLink(assignment.user_home_wiki_url, assignment.user_wiki_id)
         assignees.push ', '
       else if assignment.role == 1
-        reviewers.push userLink(assignment.user_wiki_id)
+        reviewers.push userLink(assignment.user_home_wiki_url, assignment.user_wiki_id)
         reviewers.push ', '
 
     assignees.pop() if assignees.length
