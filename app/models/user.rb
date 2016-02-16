@@ -49,6 +49,7 @@ class User < ActiveRecord::Base
   has_many :assignments
   has_many :uploads, class_name: CommonsUpload
   has_many :training_modules_users, class_name: 'TrainingModulesUsers'
+  belongs_to :home_wiki, class_name: Wiki
 
   scope :admin, -> { where(permissions: Permissions::ADMIN) }
   scope :trained, -> { where(trained: true) }
@@ -65,6 +66,8 @@ class User < ActiveRecord::Base
 
   scope :trained, -> { where(trained: true) }
   scope :ungreeted, -> { where(greeted: false) }
+
+  before_save :set_default_wiki
 
   ####################
   # Instance methods #
@@ -135,5 +138,10 @@ class User < ActiveRecord::Base
   def to_json(options={})
     options[:except] ||= [:wiki_token, :wiki_secret, :remember_token]
     super(options)
+  end
+
+  def set_default_wiki
+    # FIXME: transitional only
+    self.home_wiki ||= Wiki.default_wiki if has_attribute?(:home_wiki_id)
   end
 end

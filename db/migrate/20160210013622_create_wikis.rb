@@ -10,6 +10,7 @@ class CreateWikis < ActiveRecord::Migration
     add_column :articles, :wiki_id, :integer, index: true
     add_column :assignments, :wiki_id, :integer, index: true
     add_column :revisions, :wiki_id, :integer, index: true
+    add_column :users, :home_wiki_id, :integer, index: true
 
     reversible do |dir|
       dir.up do
@@ -23,6 +24,10 @@ class CreateWikis < ActiveRecord::Migration
 
         execute %(
           UPDATE revisions SET wiki_id = #{default_wiki.id}
+        )
+
+        execute %(
+          UPDATE users SET home_wiki_id = #{default_wiki.id}
         )
       end
     end

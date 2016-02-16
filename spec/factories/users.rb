@@ -33,6 +33,7 @@ FactoryGirl.define do
     id '4543197'
     wiki_id 'Ragesock'
     onboarded true
+    association :home_wiki, factory: :wiki
   end
 
   factory :trained, class: User do
