@@ -4,14 +4,23 @@ class ArticleStatusManager
   # Entry point #
   ###############
 
-  # Queries deleted state and namespace for all articles
+  # Iterate over all wikis
   def self.update_article_status(articles=nil)
-    # TODO: Narrow this down even more. Current courses, maybe?
     local_articles = articles || Article.all
+    wikis = local_articles.wikis.uniq { |w| w.id }
 
+    for wiki in wikis do
+      wiki_articles = local_articles.select { |a| a.wiki == wiki }
+
+      update_wiki_article_status(wiki_articles, wiki)
+    end
+  end
+
+  # Queries deleted state and namespace for articles in a given wiki
+  def self.update_wiki_article_status(articles, wiki)
     failed_request_count = 0
-    synced_articles = Utils.chunk_requests(local_articles, 100) do |block|
-      request_results = Replica.get_existing_articles_by_id block
+    synced_articles = Utils.chunk_requests(articles, 100) do |article_block|
+      request_results = Replica.get_existing_articles_by_id article_block, wiki.language, wiki.project
       failed_request_count += 1 if request_results.nil?
       request_results
     end
@@ -22,7 +31,7 @@ class ArticleStatusManager
     # FIXME: A better approach would be to look for deletion logs, and only mark
     # an article as deleted if there is a corresponding deletion log.
     if failed_request_count == 0
-      deleted_ids = local_articles.pluck(:native_id) - synced_ids
+      deleted_ids = articles.pluck(:native_id) - synced_ids
     else
       deleted_ids = []
     end
@@ -37,10 +46,11 @@ class ArticleStatusManager
     update_article_ids deleted_ids
 
     # Delete articles as appropriate
-    local_articles.where(id: deleted_ids).update_all(deleted: true)
-    local_articles.where(id: synced_ids).update_all(deleted: false)
-    ArticlesCourses.where(article_id: deleted_ids).destroy_all
-    limbo_revisions = Revision.where(article_id: deleted_ids)
+    deleted_articles = articles.where(native_id: deleted_ids)
+    deleted_articles.update_all(deleted: true)
+    articles.where(id: synced_ids).update_all(deleted: false)
+    ArticlesCourses.where(article_id: deleted_articles.ids).destroy_all
+    limbo_revisions = Revision.where(article_id: deleted_articles.ids)
     RevisionImporter.move_or_delete_revisions limbo_revisions
   end
 
@@ -52,7 +62,7 @@ class ArticleStatusManager
     # Update titles and namespaces based on ids (we trust ids!)
     synced_articles.map! do |sa|
       Article.new(
-        id: sa['page_id'],
+        native_id: sa['page_id'],
         title: sa['page_title'],
         namespace: sa['page_namespace'],
         deleted: false # Accounts for the case of undeleted articles
@@ -95,7 +105,7 @@ class ArticleStatusManager
     return unless article.title == title
 
     ArticlesCourses.where(article_id: article.id)
-      .update_all(article_id: id)
+      .update_all(native_id: id)
 
     if Article.where(native_id: id).any?
       # Catches case where update_constantly has

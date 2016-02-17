@@ -2,8 +2,8 @@ require "#{Rails.root}/lib/replica"
 
 #= Imports articles from Wikipedia into the dashboard database
 class ArticleImporter
-  def self.import_articles(ids)
-    article_ids = ids.map { |id| { 'id' => id } }
+  def self.import_articles(ids, wiki)
+    article_ids = ids.map { |id| { 'native_id' => id } }
     articles_data = []
     article_ids.each_slice(40) do |some_article_ids|
       articles_data += Replica.get_existing_articles_by_id some_article_ids

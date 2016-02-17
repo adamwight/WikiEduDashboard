@@ -21,7 +21,7 @@ class UserImporter
 
     id = WikiApi.get_user_id(auth.info.name)
     user = User.create(
-      id: id,
+      native_id: id,
       wiki_id: auth.info.name,
       global_id: auth.uid,
       wiki_token: auth.credentials.token,
@@ -39,7 +39,7 @@ class UserImporter
       user = User.find(id)
     else
       user = User.create(
-        id: id,
+        native_id: id,
         wiki_id: wiki_id
       )
     end
@@ -54,8 +54,8 @@ class UserImporter
   end
 
   def self.add_user(user, role, course, save=true)
-    empty_user = User.new(id: user['id'])
-    new_user = save ? User.find_or_create_by(id: user['id']) : empty_user
+    empty_user = User.new(native_id: user['native_id'])
+    new_user = save ? User.find_or_create_by(native_id: user['native_id']) : empty_user
     new_user.wiki_id = user['username']
     if save
       if !role.nil? && !course.nil?
@@ -85,7 +85,7 @@ class UserImporter
     User.transaction do
       u_users.each do |u|
         begin
-          User.find(u['id']).update(u.except('id'))
+          User.find(u['native_id']).update(u.except('native_id'))
         rescue ActiveRecord::RecordNotFound => e
           Rails.logger.warn e
         end

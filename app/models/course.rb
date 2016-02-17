@@ -162,6 +162,8 @@ class Course < ActiveRecord::Base
     # Some types do not have corresponding on-wiki pages, so they have no
     # wiki_title or url.
     return unless wiki_title
+    # FIXME: We should be probably be more flexible about the URL?
+    # For example, we don't know the home wiki of the course.
     language = ENV['wiki_language']
     "https://#{language}.wikipedia.org/wiki/#{wiki_title}"
   end

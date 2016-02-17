@@ -8,5 +8,6 @@ json.assignments course.assignments do |assignment|
   end
 
   json.article_url assignment.page_url
+  json.user_home_wiki_url assignment.user.home_wiki.base_url
   json.user_wiki_id assignment.user.wiki_id
 end

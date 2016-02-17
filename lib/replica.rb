@@ -16,8 +16,8 @@ class Replica
 
   # Given a list of users and a start and end date, return a nicely formatted
   # array of revisions made by those users between those dates.
-  def self.get_revisions(users, rev_start, rev_end, language=nil)
-    raw = Replica.get_revisions_raw(users, rev_start, rev_end, language)
+  def self.get_revisions(users, rev_start, rev_end, language, project)
+    raw = Replica.get_revisions_raw(users, rev_start, rev_end, language, project)
     data = {}
     return data unless raw.is_a?(Enumerable)
     raw.each do |revision|
@@ -79,44 +79,44 @@ class Replica
   # As of 2015-02-24, revisions.php only queries namespaces:
   #   0 ([mainspace])
   #   2 (User:)
-  def self.get_revisions_raw(users, rev_start, rev_end, language=nil)
+  def self.get_revisions_raw(users, rev_start, rev_end, language, project)
     user_list = compile_user_ids_string(users)
     oauth_tags = compile_oauth_tags
     oauth_tags = oauth_tags.blank? ? oauth_tags : "&#{oauth_tags}"
     query = user_list + oauth_tags + "&start=#{rev_start}&end=#{rev_end}"
-    api_get('revisions_by_user_id.php', query, language)
+    api_get('revisions_by_user_id.php', query, language, project)
   end
 
   # Given a list of users, fetch their global_id and trained status. Completion
   # of training is defined by the users.php endpoint as having made an edit
   # to a specific page on Wikipedia:
   # [[Wikipedia:Training/For students/Training feedback]]
-  def self.get_user_info(users, language=nil)
+  def self.get_user_info(users, language, project)
     query = compile_user_ids_string(users)
     if ENV['training_page_id']
       query = "#{query}&training_page_id=#{ENV['training_page_id']}"
     end
-    api_get('users.php', query, language)
+    api_get('users.php', query, language, project)
   end
 
   # Given a list of articles, see which ones have not been deleted.
-  def self.get_existing_articles_by_id(articles, language=nil)
+  def self.get_existing_articles_by_id(articles, language, project)
     article_list = compile_article_id_string(articles)
-    existing_articles = api_get('articles.php', article_list, language)
+    existing_articles = api_get('articles.php', article_list, language, project)
     existing_articles unless existing_articles.nil?
   end
 
   # Given a list of articles, see which ones have not been deleted.
-  def self.get_existing_articles_by_title(articles, language=nil)
+  def self.get_existing_articles_by_title(articles, language, project)
     article_list = compile_article_title_string(articles)
-    existing_articles = api_get('articles.php', article_list, language)
+    existing_articles = api_get('articles.php', article_list, language, project)
     existing_articles unless existing_articles.nil?
   end
 
   # Given a list of revisions, see which ones have not been deleted
-  def self.get_existing_revisions_by_id(revisions, language=nil)
+  def self.get_existing_revisions_by_id(revisions, language, project)
     revision_list = compile_revision_id_string(revisions)
-    existing_revisions = api_get('revisions.php', revision_list, language)
+    existing_revisions = api_get('revisions.php', revision_list, language, project)
     existing_revisions unless existing_revisions.nil?
   end
 
@@ -159,9 +159,9 @@ class Replica
     #   "new_article"=>"false",
     #   "byte_change"=>"-50"
     #  }]
-    def api_get(endpoint, query='', language=nil)
+    def api_get(endpoint, query='', language, project)
       tries ||= 3
-      url = compile_query_url(endpoint, query, language)
+      url = compile_query_url(endpoint, query, language, project)
       response = Net::HTTP::get(URI.parse(url))
       return unless response.length > 0
       parsed = JSON.parse response.to_s
@@ -175,10 +175,9 @@ class Replica
       report_exception e, endpoint, query
     end
 
-    def compile_query_url(endpoint, query, language=nil)
-      language ||= ENV['wiki_language']
+    def compile_query_url(endpoint, query, language, project)
       base_url = 'http://tools.wmflabs.org/wikiedudashboard/'
-      raw_url = "#{base_url}#{endpoint}?lang=#{language}&#{query}"
+      raw_url = "#{base_url}#{endpoint}?lang=#{language}&project=#{project}&#{query}"
       URI.encode(raw_url)
     end
 
