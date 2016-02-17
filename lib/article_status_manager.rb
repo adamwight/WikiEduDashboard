@@ -22,7 +22,7 @@ class ArticleStatusManager
     # FIXME: A better approach would be to look for deletion logs, and only mark
     # an article as deleted if there is a corresponding deletion log.
     if failed_request_count == 0
-      deleted_ids = local_articles.pluck(:id) - synced_ids
+      deleted_ids = local_articles.pluck(:native_id) - synced_ids
     else
       deleted_ids = []
     end
@@ -65,7 +65,7 @@ class ArticleStatusManager
   # Check whether any deleted pages still exist with a different article_id.
   # If so, update the Article to use the new id.
   def self.update_article_ids(deleted_ids)
-    maybe_deleted = Article.where(id: deleted_ids)
+    maybe_deleted = Article.where(native_id: deleted_ids)
 
     # These pages have titles that match Articles in our DB with deleted ids
     same_title_pages = Utils.chunk_requests(maybe_deleted, 100) do |block|
@@ -97,12 +97,12 @@ class ArticleStatusManager
     ArticlesCourses.where(article_id: article.id)
       .update_all(article_id: id)
 
-    if Article.exists?(id)
+    if Article.where(native_id: id).any?
       # Catches case where update_constantly has
       # already added this article under a new ID
       article.update(deleted: true)
     else
-      article.update(id: id)
+      article.update(native_id: id)
     end
   end
 end

@@ -93,7 +93,7 @@ class RevisionImporter
       a['revisions'].map { |r| r['id'] }
     end
     rev_ids = rev_ids.flatten
-    Revision.where(id: rev_ids)
+    Revision.where(native_id: rev_ids)
   end
 
   def self.import_revisions_slice(sub_data)
@@ -126,9 +126,9 @@ class RevisionImporter
     end
     synced_ids = synced_revisions.map { |r| r['rev_id'].to_i }
 
-    deleted_ids = revisions.pluck(:id) - synced_ids
-    Revision.where(id: deleted_ids).update_all(deleted: true)
-    Revision.where(id: synced_ids).update_all(deleted: false)
+    deleted_ids = revisions.pluck(:native_id) - synced_ids
+    Revision.where(native_id: deleted_ids).update_all(deleted: true)
+    Revision.where(native_id: synced_ids).update_all(deleted: false)
 
     moved_ids = synced_ids - deleted_ids
     moved_revisions = synced_revisions.reduce([]) do |moved, rev|
@@ -143,6 +143,6 @@ class RevisionImporter
     article_id = moved['rev_page']
     Revision.find(moved['rev_id']).update(article_id: article_id)
     ArticleImporter
-      .import_articles([article_id]) unless Article.exists?(article_id)
+      .import_articles([article_id]) unless Article.where(native_id: article_id).any?
   end
 end

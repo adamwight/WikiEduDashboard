@@ -46,7 +46,7 @@ class CategoryImporter
   ##################
   def self.views_and_scores_output(article_ids, min_views, max_wp10)
     output = "title,average_views,completeness,views/completeness\n"
-    articles = Article.where(id: article_ids)
+    articles = Article.where(native_id: page_ids)
                .where('average_views > ?', min_views)
     articles.each do |article|
       title = article.title
@@ -73,20 +73,20 @@ class CategoryImporter
 
   def self.import_missing_info(article_ids)
     outdated_views = Article
-                     .where(id: article_ids)
+                     .where(native_id: page_ids)
                      .where('average_views_updated_at < ?', 1.year.ago)
-                     .pluck(:id)
+                     .pluck(:native_id)
     import_average_views outdated_views
-    missing_views = Article.where(id: article_ids, average_views: nil)
+    missing_views = Article.where(native_id: page_ids, average_views: nil)
     import_average_views missing_views
 
-    existing_revisions = Revision.where(article_id: article_ids)
-    missing_revisions = article_ids - existing_revisions.pluck(:article_id)
+    existing_revisions = Revision.where(page_id: page_ids)
+    missing_revisions = article_ids - existing_revisions.pluck(:page_id)
 
     # Get the missing revisions and update existing_revisions afterwards
     import_latest_revision missing_revisions unless missing_revisions.empty?
 
-    missing_revision_scores = Revision.where(article_id: article_ids, wp10: nil)
+    missing_revision_scores = Revision.where(page_id: page_ids, wp10: nil)
     RevisionScoreImporter.update_revision_scores missing_revision_scores
   end
 
@@ -99,15 +99,15 @@ class CategoryImporter
 
   def self.article_ids_for_category(category, depth=0)
     cat_query = category_query category
-    article_ids = get_category_member_properties(cat_query, 'pageid')
+    page_ids = get_category_member_properties(cat_query, 'pageid')
     if depth > 0
       depth -= 1
       subcats = subcategories_of(category)
       subcats.each do |subcat|
-        article_ids += article_ids_for_category(subcat, depth)
+        page_ids += page_ids_for_category(subcat, depth)
       end
     end
-    article_ids
+    page_ids
   end
 
   def self.get_category_member_properties(query, property)
