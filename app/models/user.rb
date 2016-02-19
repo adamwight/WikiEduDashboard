@@ -80,17 +80,22 @@ class User < ActiveRecord::Base
   end
 
   def contribution_url
-    language = ENV['wiki_language']
-    "https://#{language}.wikipedia.org/wiki/Special:Contributions/#{wiki_id}"
+    "#{home_wiki.base_url}wiki/Special:Contributions/#{wiki_id}"
   end
 
   def sandbox_url
-    language = ENV['wiki_language']
-    "https://#{language}.wikipedia.org/wiki/Special:PrefixIndex/User:#{wiki_id}"
+    "#{home_wiki.base_url}wiki/Special:PrefixIndex/User:#{wiki_id}"
   end
 
   def talk_page
     "User_talk:#{wiki_id}"
+  end
+
+  def home_wiki
+    # FIXME: This is wild guess.
+    return assignments.first.wiki unless assignments.empty?
+    return courses.first.home_wiki unless courses.empty?
+    Wiki.default_wiki
   end
 
   def admin?
