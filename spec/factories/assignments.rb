@@ -23,7 +23,6 @@ FactoryGirl.define do
     course_id 481
     article_id 124_884_99
     article_title 'Siderocalin'
-    wiki
   end
 
   # article that does not exist
@@ -35,6 +34,5 @@ FactoryGirl.define do
     course_id 481
     article_id nil
     article_title 'Faecal calprotectin'
-    wiki
   end
 end
