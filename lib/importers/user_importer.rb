@@ -22,7 +22,8 @@ class UserImporter
     # TODO: Which wiki?
     id = WikiApi.new(wiki: Wiki.default_wiki).get_user_id(auth.info.name)
     user = User.create(
-      id: id,
+      id: native_id, # TODO: Stop writing primary ID
+      native_id: native_id,
       wiki_id: auth.info.name,
       global_id: auth.uid,
       wiki_token: auth.credentials.token,
@@ -37,16 +38,11 @@ class UserImporter
     id = WikiApi.new(wiki: Wiki.default_wiki).get_user_id(wiki_id)
     return unless id
 
-    if User.exists?(id)
-      user = User.find(id)
-    else
-      user = User.create(
-        id: id,
+    User.create_with(
+        id: native_id, # TODO: stop writing ID
+        native_id: native_id,
         wiki_id: wiki_id
-      )
-    end
-
-    user
+    ).find_or_create_by(native_id: native_id)
   end
 
   def self.add_users(data, role, course, save=true)
@@ -55,26 +51,34 @@ class UserImporter
     end
   end
 
-  def self.add_user(user, role, course, save=true)
-    empty_user = User.new(id: user['id'])
-    new_user = save ? User.find_or_create_by(id: user['id']) : empty_user
-    new_user.wiki_id = user['username']
+  def self.add_user(params, role, course, save=true)
     if save
-      if !role.nil? && !course.nil?
+      user = User.find_or_create_by(global_id: params['global_id'])
+    else
+      user = User.new(global_id: params['global_id'])
+    end
+    # TODO: Stop writing to ID.
+    user.id = params['id']
+    # FIXME: Nowhere to store the onwiki id
+    user.wiki_id = params['username']
+
+    if save
+      unless role.nil? || course.nil?
         role_index = %w(student instructor online_volunteer
                         campus_volunteer wiki_ed_staff)
-        has_user = course.users.role(role_index[role]).include? new_user
+        has_user = course.users.role(role_index[role]).include? user
         unless has_user
           role = get_wiki_ed_role(user, role)
-          CoursesUsers.new(user: new_user, course: course, role: role).save
+          CoursesUsers.new(user: user, course: course, role: role).save
         end
       end
-      new_user.save
+      user.save
     end
-    new_user
+    user
   end
 
   # If a user has (Wiki Ed) in their name, assign them to the staff role
+  # FIXME: Don't do that.  Manage staff user IDs in the database or something.
   def self.get_wiki_ed_role(user, role)
     (user['username'].include? '(Wiki Ed)') ? 4 : role
   end
@@ -92,7 +96,7 @@ class UserImporter
     User.transaction do
       u_users.each do |u|
         begin
-          User.find(u['id']).update(u.except('id'))
+          User.find_by(global_id: u['global_id']).update(u.exclude('id'))
         rescue ActiveRecord::RecordNotFound => e
           Rails.logger.warn e
         end
