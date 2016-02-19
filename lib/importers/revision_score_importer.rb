@@ -37,13 +37,13 @@ class RevisionScoreImporter
   # FIXME: Only used in a test?
   def update_all_revision_scores_for_articles(page_ids = nil)
     # TODO: group by wiki (pending above fixme)
-    article_ids ||= Article.namespace(0).pluck(:id)
-    revisions = Revision.where(article_id: article_ids)
+    page_ids ||= Article.namespace(0).pluck(:native_id)
+    revisions = Revision.where(page_id: page_ids)
     update_revision_scores revisions
 
     first_revisions = []
-    article_ids.each do |id|
-      first_revisions << Revision.where(article_id: id).first
+    page_ids.each do |page_id|
+      first_revisions << Revision.where(page_id: page_id).first
     end
 
     first_revisions.each do |revision|
@@ -63,13 +63,14 @@ class RevisionScoreImporter
   def unscored_mainspace_userspace_and_draft_revisions
     Revision.joins(:article)
       .where(wp10: nil)
+      .where(wiki_id: @wiki.id)
       .where(articles: { namespace: [0, 2, 118] })
   end
 
   def save_scores(scores)
     scores.each do |rev_id, score|
       next unless score.key?('probability')
-      revision = Revision.find(rev_id.to_i)
+      revision = Revision.find_by(native_id: rev_id.to_i, wiki_id: @wiki.id)
       revision.wp10 = weighted_mean_score score['probability']
       revision.save
     end
@@ -79,7 +80,7 @@ class RevisionScoreImporter
     # FIXME: Why not autoloaded?
     require "#{Rails.root}/lib/wiki_api"
 
-    rev_id = revision.id
+    rev_id = revision.native_id
     rev_query = revision_query(rev_id)
     response = WikiApi.new(wiki: revision.wiki).query rev_query
     prev_id = response.data['pages'].values[0]['revisions'][0]['parentid']
@@ -105,7 +106,7 @@ class RevisionScoreImporter
   end
 
   def query_url(rev_ids)
-    base_url = 'http://ores.wmflabs.org/scores/enwiki/wp10/?revids='
+    base_url = "http://ores.wmflabs.org/scores/#{@wiki.db_name}/wp10/?revids="
     rev_ids_param = rev_ids.map(&:to_s).join('|')
     url = base_url + rev_ids_param
     url = URI.encode url
