@@ -1,3 +1,7 @@
 default:
   language: en
   project: wikipedia
+
+eswiki:
+  language: es
+  project: wikipedia

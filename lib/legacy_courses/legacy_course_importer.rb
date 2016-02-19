@@ -135,8 +135,9 @@ class LegacyCourseImporter
   def self.build_assignments(course_id, group_flat)
     require "#{Rails.root}/lib/legacy_courses/legacy_course_assignments"
     # Add assigned articles
+    # TODO: Don't assume wiki
     assignments = LegacyCourseAssignments
-                  .build_assignments_from_group_flat(course_id, group_flat)
+                  .build_assignments_from_group_flat(course_id, group_flat, Wiki.default_wiki)
     assignments
   end
 
