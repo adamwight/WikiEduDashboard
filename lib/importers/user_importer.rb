@@ -91,7 +91,7 @@ class UserImporter
     User.transaction do
       u_users.each do |u|
         begin
-          User.find_by!(global_id: u['global_id']).update(u.except('id'))
+          User.find_by!(wiki_id: u['wiki_id']).update(u.except('id'))
         rescue ActiveRecord::RecordNotFound => e
           Rails.logger.warn e
         end
