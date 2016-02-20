@@ -172,7 +172,7 @@ describe Replica do
         rev_start = 2015_02_12_003430
         rev_end = 2015_03_10_003430
 
-        eswiki = Wiki.find_or_create_by(language: 'es', project: 'wikipedia')
+        eswiki = Wiki.get language: 'es', project: 'wikipedia'
         response = Replica.new(eswiki).get_revisions(all_users, rev_start, rev_end)
         expect(response.count).to eq(24)
       end

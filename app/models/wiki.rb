@@ -66,8 +66,12 @@ class Wiki < ActiveRecord::Base
   end
 
   def self.default_wiki
-    # FIXME: Deprecate immediately--this is just a transitional method to let us
-    # ignore multiwiki in the UI, for a moment.
-    Wiki.find_by(language: ENV['wiki_language'], project: 'wikipedia')
+    # FIXME: Deprecate immediately--this is just a transitional method that allows
+    # us to leave some multiwiki support undone in the UI, and the User and Course models.
+    get language: ENV['wiki_language'], project: 'wikipedia'
+  end
+
+  def self.get(params)
+    where(params).first_or_create
   end
 end
