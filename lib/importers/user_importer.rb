@@ -23,7 +23,6 @@ class UserImporter
     native_id = WikiApi.new(Wiki.default_wiki).get_user_id(auth.info.name)
     user = User.create(
       id: native_id, # TODO: Stop writing primary ID
-      native_id: native_id,
       wiki_id: auth.info.name,
       global_id: auth.uid,
       wiki_token: auth.credentials.token,
@@ -38,7 +37,9 @@ class UserImporter
     native_id = WikiApi.new(Wiki.default_wiki).get_user_id(wiki_id)
     return unless native_id
 
-    User.find_or_create_by(wiki_id: wiki_id)
+    User.create_with(
+      id: native_id # FIXME: don't update ID
+    ).find_or_create_by(wiki_id: wiki_id)
   end
 
   def self.add_users(data, role, course, save=true)
@@ -48,14 +49,12 @@ class UserImporter
   end
 
   def self.add_user(params, role, course, save=true)
+    # FIXME: fetch and use global_id instead
     if save
-      user = User.find_or_create_by(global_id: params['global_id'])
+      user = User.find_or_create_by(id: params['global_id'])
     else
-      user = User.new(global_id: params['global_id'])
+      user = User.new(id: params['global_id'])
     end
-    # TODO: Stop writing to ID.
-    user.id = params['id']
-    # FIXME: Nowhere to store the onwiki id
     user.wiki_id = params['username']
 
     if save
