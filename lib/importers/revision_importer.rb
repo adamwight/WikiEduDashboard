@@ -28,23 +28,12 @@ class RevisionImporter
 
   # Given a Course, get new revisions for the users in that course.
   def self.get_revisions_for_course(course)
-    results = []
-    return results if course.students.empty?
+    return [] if course.students.empty?
     start_date = course_start_date(course)
     end_date = course_end_date(course)
 
-    old_users = course.students - new_users
-
     # TODO: Make a better educated guess about which wikis to search for edits.
-    wikis = course.assignments.map(&:wiki).uniq
-
-    # rubocop:disable Style/IfUnlessModifier
-    unless course.students.empty?
-      results += get_revisions(course.students, start_date, end_date, wikis)
-    end
-    # rubocop:enable Style/IfUnlessModifier
-
-    results
+    get_revisions(course.students, start_date, end_date, [course.home_wiki])
   end
 
   # Get revisions made by a set of users between two dates.

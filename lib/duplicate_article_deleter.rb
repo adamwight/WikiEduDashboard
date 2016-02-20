@@ -17,12 +17,12 @@ class DuplicateArticleDeleter
         title = article[0][0]
         namespace = article[0][1]
         Rails.logger.debug "Resolving duplicates for '#{title}, ns #{namespace}'"
-        page_ids += delete_duplicates wiki, title, namespace
+        page_ids |= delete_duplicates wiki, title, namespace
       end
 
       # At this stage check to see if the deleted articles' revisions still exist
       # if so, move them to their new article ID
-      limbo_revisions = Revision.where(page_id: deleted_ids, wiki_id: wiki.id)
+      limbo_revisions = Revision.where(page_id: page_ids, wiki_id: wiki.id)
       RevisionImporter.move_or_delete_revisions limbo_revisions
     end
   end
