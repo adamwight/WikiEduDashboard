@@ -19,7 +19,7 @@ class RevisionImporter
   def self.update_all_revisions(courses=nil, all_time=false)
     courses = [courses] if courses.is_a? Course
     courses ||= all_time ? Course.all : Course.current
-    courses.each do |course|
+    courses.includes(:students).each do |course|
       results = get_revisions_for_course(course)
       import_revisions(results)
       ArticlesCourses.update_from_course(course)

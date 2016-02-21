@@ -39,6 +39,7 @@ class ArticleStatusManager
     if failed_request_count == 0
       deleted_articles = articles - synced_articles
     else
+      # FIXME: Is this downcasting the Rails array during math?
       deleted_articles = []
     end
 
@@ -67,7 +68,7 @@ class ArticleStatusManager
 
   def update_title_and_namespace(articles, synced_article_data)
     synced_article_data.each do |sa|
-      # Note that articles must be from the same wiki.
+      # Note that articles are on the same wiki.
       articles.where(native_id: sa['page_id']).update_all({
         title: sa['page_title'],
         namespace: sa['page_namespace'],

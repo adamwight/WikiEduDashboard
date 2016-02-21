@@ -2,7 +2,7 @@
 
 require 'csv'
 
-Cohort.all.each do |cohort|
+Cohort.all.includes(:courses, :students).each do |cohort|
   CSV.open("/root/#{cohort.slug}.csv", 'wb') do |csv|
     csv << ['course_slug', 'students', 'characters_added']
     cohort.courses.each do |course|

@@ -81,7 +81,7 @@ class WikiCourseOutput
     students = course.students
     return '' if students.blank?
     table = "{{students table}}\r"
-    students.each do |student|
+    students.includes(:assignments).each do |student|
       username = student.wiki_id
       assignments = student.assignments.where(course_id: course.id)
       assigned_titles = assignments.assigned.pluck(:article_title)

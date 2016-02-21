@@ -4,7 +4,7 @@ require "#{Rails.root}/lib/analytics/monthly_report"
 namespace :analytics do
   desc 'Report on the productivity of students, per cohort'
   task stats_per_cohort: 'batch:setup_logger' do
-    Cohort.all.each do |cohort|
+    Cohort.all.includes(:courses).each do |cohort|
       course_ids = cohort.courses.where(listed: true).pluck(:id)
       report = CourseStatistics.report_statistics course_ids
       report = "#{cohort.slug}:" + report
@@ -15,7 +15,7 @@ namespace :analytics do
   desc 'Report on the productivity of all students'
   task combined_stats: 'batch:setup_logger' do
     course_ids = []
-    Cohort.all.each do |cohort|
+    Cohort.all.includes(:courses).each do |cohort|
       course_ids += cohort.courses.where(listed: true).pluck(:id)
     end
     report = CourseStatistics.report_statistics course_ids

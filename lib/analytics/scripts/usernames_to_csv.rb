@@ -12,7 +12,7 @@ CSV.open('/root/all_course_participants.csv', 'wb') do |csv|
 end
 
 # student usernames by cohort
-Cohort.all.each do |cohort|
+Cohort.all.includes(:students).each do |cohort|
   CSV.open("/root/#{cohort.slug}_students.csv", 'wb') do |csv|
     cohort.students.each do |student|
       csv << [student.wiki_id]
@@ -21,7 +21,7 @@ Cohort.all.each do |cohort|
 end
 
 # student usernames and courses, by cohort
-Cohort.all.each do |cohort|
+Cohort.all.includes(courses: :students).each do |cohort|
   CSV.open("/root/#{cohort.slug}_students.csv", 'wb') do |csv|
     cohort.courses.each do |course|
       course.students.each do |student|
@@ -34,7 +34,7 @@ end
 # courses, instructor usernames and ids
 CSV.open("/root/course_instructors.csv", 'wb') do |csv|
   csv << ['course', 'instructor_user_id', 'instructor username']
-  Course.all.each do |course|
+  Course.all.includes(:instructors).each do |course|
     course.instructors.each do |instructor|
       csv << [course.slug, instructor.id, instructor.wiki_id]
     end
