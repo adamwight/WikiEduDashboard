@@ -24,7 +24,6 @@ class ArticleStatusManager
     if failed_request_count == 0
       deleted_ids = local_articles.pluck(:id) - synced_ids
     else
-      deleted_ids = []
     end
 
     # First we find any pages that just moved, and update title and namespace.

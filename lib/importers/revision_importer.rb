@@ -89,25 +89,36 @@ class RevisionImporter
   end
 
   def self.get_revisions_from_import_data(data)
+<<<<<<< HEAD
     rev_ids = data.map do |_a_id, a|
       a['revisions'].map { |r| r['id'] }
+=======
+    revisions = Revision.none
+    data.group_by { |a| a['article']['wiki_id'] }.each do |wiki_id, articles|
+      rev_ids = []
+      articles.each do |a|
+        rev_ids |= a['revisions'].map { |r| r['rev_id'] }
+      end
+      revisions |= Revision.where(native_id: rev_ids, wiki_id: wiki_id)
+>>>>>>> Use AR Relation "none" rather than array
     end
     rev_ids = rev_ids.flatten
     Revision.where(id: rev_ids)
   end
 
   def self.import_revisions_slice(sub_data)
-    articles, revisions = [], []
+    articles = Article.none
+    revisions = Revision.none
 
     sub_data.each do |_a_id, a|
       article = Article.new(id: a['article']['id'])
       article.update(a['article'], false)
-      articles.push article
+      articles << article
 
       a['revisions'].each do |r|
         revision = Revision.new(id: r['id'])
         revision.update(r, false)
-        revisions.push revision
+        revisions << revision
       end
     end
 

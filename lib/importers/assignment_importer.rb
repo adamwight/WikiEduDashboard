@@ -14,6 +14,7 @@ class AssignmentImporter
   end
 
   def self.update_article_ids(raw_articles)
+    # Regenerate list by title
     articles = Article
                .where(title: raw_articles.map(&:title))
                .where(namespace: 0)

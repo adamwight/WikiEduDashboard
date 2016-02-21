@@ -34,9 +34,15 @@ class RevisionScoreImporter
     revisions = Revision.where(article_id: article_ids)
     update_revision_scores revisions
 
+<<<<<<< HEAD
     first_revisions = []
     article_ids.each do |id|
       first_revisions << Revision.where(article_id: id).first
+=======
+    first_revisions = Revision.none
+    page_ids.each do |page_id|
+      first_revisions |= Revision.where(page_id: page_id).first
+>>>>>>> Use AR Relation "none" rather than array
     end
 
     first_revisions.each do |revision|

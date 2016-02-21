@@ -27,7 +27,7 @@ class ArticleImporter
       results = response.data
       next if results.empty?
       results = results['pages']
-      articles = []
+      articles = Article.none
       results.each do |_id, page_data|
         next if page_data['missing']
         articles << Article.new(id: page_data['pageid'].to_i,
